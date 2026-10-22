@@ -30,7 +30,20 @@ final class WebpGenerator
             return $url;
         }
 
+        # Never feed a URL that already is a WebP back into GD (issue #16): the mime check above
+        # relies on the store's detection, which need not agree with the URL's extension.
+        if (str_ends_with(strtolower(strtok($url, '?')), '.webp')) {
+            return $url;
+        }
+
         $originalFilename = PUBLIC_PATH . $url;
+
+        # imagecreatefrom*() raises an E_WARNING on a missing or unreadable file, which the
+        # Silverstripe error handler turns into an exception in dev mode; serve the original instead.
+        if (!is_file($originalFilename) || !is_readable($originalFilename)) {
+            return $url;
+        }
+
         $webpUrl = "{$url}.webp";
         $webpFilename = PUBLIC_PATH . $webpUrl;
 
