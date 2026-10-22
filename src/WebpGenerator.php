@@ -56,7 +56,8 @@ final class WebpGenerator
         }
 
         $webpImage = imagewebp($image, $webpFilename, $this->quality);
-        imagedestroy($image);
+        # imagedestroy() has been a no-op since PHP 8.0 and is deprecated as of PHP 8.5 (allowed by SS6)
+        // imagedestroy($image);
 
         return $webpImage === false ? $url : $webpUrl;
     }
