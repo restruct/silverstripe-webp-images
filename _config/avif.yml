@@ -1,0 +1,24 @@
+---
+Name: webpimages-avif
+---
+# AVIF as a first-class image, needed for the AVIF <source> of $Image.Picture (off by default, see
+# WebpImages.picture_formats). Without this, core's Convert('avif') does write a valid image/avif
+# variant, but:
+# - it is not an allowed extension, so the generated assets/.htaccess answers 403 for it;
+# - getIsImage() is false (DBFile.supported_images decides that), so it renders as a download link.
+# Side effect worth knowing: CMS users can now also upload .avif files, like any other image.
+SilverStripe\Assets\File:
+  allowed_extensions:
+    - avif
+  app_categories:
+    image:
+      - avif
+    image/supported:
+      - avif
+SilverStripe\Assets\Storage\DBFile:
+  supported_images:
+    - image/avif
+# Only used when PHP's fileinfo cannot tell the mime type (HTTP::get_mime_type() fallback)
+SilverStripe\Control\HTTP:
+  MimeTypes:
+    avif: image/avif

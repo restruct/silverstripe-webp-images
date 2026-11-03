@@ -1,28 +1,63 @@
 {
-    "name": "wedevelopnl/silverstripe-webp-images",
-    "description": "webp images module",
+    "name": "restruct/silverstripe-webp-images",
+    "description": "Serve resized JPEG and PNG images as WebP in Silverstripe 5 and 6, using core image variants, with an optional <picture> helper that adds AVIF",
+    "type": "silverstripe-vendormodule",
+    "license": "MIT",
     "keywords": [
         "silverstripe",
+        "silverstripe-module",
         "webp",
-        "images"
+        "avif",
+        "images",
+        "picture",
+        "assets",
+        "performance"
     ],
-    "authors": [{
-        "name": "WeDevelop",
-        "email": "development@wedevelop.nl"
-    }],
-    "minimum-stability": "dev",
-    "prefer-stable": true,
+    "homepage": "https://github.com/restruct/silverstripe-webp-images",
+    "authors": [
+        {
+            "name": "Restruct",
+            "email": "dev@restruct.nl",
+            "homepage": "https://restruct.nl"
+        },
+        {
+            "name": "WeDevelop",
+            "email": "development@wedevelop.nl"
+        }
+    ],
     "require": {
         "php": "^8.1",
-        "silverstripe/framework": "^5 || ^6",
-        "silverstripe/assets": "^2 || ^3"
+        "silverstripe/framework": "^5.3 || ^6",
+        "silverstripe/assets": "^2.3 || ^3"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.4"
+        "silverstripe/recipe-testing": "^3 || ^4"
+    },
+    "conflict": {
+        "wedevelopnl/silverstripe-webp-images": "*"
     },
     "autoload": {
         "psr-4": {
-            "WeDevelop\\WebpImages\\": "src/"
+            "Restruct\\Silverstripe\\WebpImages\\": "src/",
+            "WeDevelop\\WebpImages\\": "src/Legacy/"
         }
-    }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Restruct\\Silverstripe\\WebpImages\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "composer/installers": true,
+            "silverstripe/vendor-plugin": true,
+            "silverstripe/recipe-plugin": true
+        }
+    },
+    "funding": [
+        {
+            "type": "github",
+            "url": "https://github.com/sponsors/restruct"
+        }
+    ]
 }
