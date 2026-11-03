@@ -15,5 +15,5 @@ If the issue does look like a new bug:
 ## Security
 Please report security issues to the module maintainers directly. Please don't file security issues in the bugtracker.
 
-## Copyright
-By supplying code to this module in any form you agree to assign copyright of that code to WeDevelop, on the condition that WeDevelop releases that code under a form of open source license.
+## Licence
+By supplying code to this module you agree that it is released under the module's MIT licence (see [LICENSE](LICENSE)).
