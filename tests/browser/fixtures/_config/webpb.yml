@@ -1,0 +1,8 @@
+---
+Name: webpb-fixtures
+After: webpimages
+---
+# BROWSER-TEST FIXTURE ONLY: AVIF on in <picture>, so the spec sees the browser pick a source
+Restruct\Silverstripe\WebpImages\WebpImages:
+  picture_formats:
+    avif: true
