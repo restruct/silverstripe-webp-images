@@ -100,7 +100,7 @@ Restruct\Silverstripe\WebpImages\WebpImages:
   # WebP quality 1-100; null = the image backend's own quality setting
   quality: 80
   # AVIF quality 1-100; null = the image backend's own quality setting
-  avif_quality: null
+  avif_quality: 60
   # <source> formats of $Image.Picture; the order is fixed (avif first, then webp)
   picture_formats:
     avif: false

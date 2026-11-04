@@ -33,7 +33,8 @@ wedevelopnl/silverstripe-webp-images 2.x".
 - AVIF as an allowed image type (`File.allowed_extensions`, `app_categories`,
   `DBFile.supported_images`, `HTTP.MimeTypes`).
 - Options `rewrite_urls`, `convert_originals`, `convert_in_cms`, `convert_extensions`,
-  `avif_quality`, `picture_formats`.
+  `avif_quality` (default 60, below WebP's 80: at the image backend's own default of 90 an AVIF
+  came out larger than the JPEG it replaces), `picture_formats`.
 - Task `webp-images-purge-sidecars`: removes the `.jpg.webp` / `.png.webp` files 2.x left in public
   assets (dry run unless confirmed).
 - Unit tests (Silverstripe 5 and 6), Playwright browser tests, CI with PHPStan.

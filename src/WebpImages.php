@@ -94,10 +94,13 @@ class WebpImages
 
     /**
      * AVIF quality (1-100). Null leaves it to the image backend's own quality setting.
+     * Defaults lower than `quality`: AVIF needs less for the same visual result, and the backend
+     * default (90 with GD) made AVIF files larger than the JPEG they replace, while `$Image.Picture`
+     * lists AVIF first, so browsers would fetch the heaviest source.
      *
      * @config
      */
-    private static ?int $avif_quality = null;
+    private static ?int $avif_quality = 60;
 
     /**
      * The <source> formats `$Image.Picture` renders, as format => on/off. AVIF is opt-in:
