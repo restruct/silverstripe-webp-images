@@ -266,8 +266,25 @@ class WebpImages
             # the converter rejects a non-int quality outright
             $options['quality'] = $quality;
         }
+        # Convert a fresh DBFile for the same stored file, never the caller's object. On assets 2
+        # (Silverstripe 5) InterventionImageFileConverter::convert() clones the image backend when
+        # a quality is passed (by default, here), but shallowly: the clone shares the original's
+        # Intervention image, and InterventionBackend::__destruct() destroys that image. Under
+        # Imagick that empties the caller's Imagick object, so the next use of the image (the
+        # <img> fallback of $Image.Picture after an avif and a webp conversion) threw "Can not
+        # process empty Imagick object". GD's destroy is a no-op, and assets 3 does not destroy
+        # in __destruct(). Costs one extra read of the source when a variant is actually encoded;
+        # an existing variant is found by name without loading the image.
+        $source = DBFile::create();
+        $source->setValue([
+            'Filename' => $file->getFilename(),
+            'Hash' => $file->getHash(),
+            'Variant' => $file->getVariant(),
+        ]);
+        # carry the caller's existing-only flag (eg a CMS thumbnail), which a fresh field resets
+        $source->setAllowGeneration($file->getAllowGeneration());
         try {
-            return Injector::inst()->get(FileConverterManager::class)->convert($file, $format, $options);
+            return Injector::inst()->get(FileConverterManager::class)->convert($source, $format, $options);
         } catch (FileConverterException $e) {
             # same handling as core's ImageManipulation::Convert(): log, serve the source instead
             Injector::inst()->get(LoggerInterface::class)->warning(

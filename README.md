@@ -61,6 +61,10 @@ The module hands every resized JPEG and PNG to core's own converter and serves t
   Imagick with WEBP in `Imagick::queryFormats()`
 - For AVIF in `<picture>`: GD with `imageavif()` (PHP 8.1+ built with libavif) or Imagick with AVIF.
   Without it the AVIF source is left out and a warning is logged.
+- Imagick on Silverstripe 5 (assets 2): supported. Core's converter there shares the image backend
+  between an image and its conversion and destroys it afterwards, which under Imagick broke the
+  next use of the image (`$Image.Picture` with AVIF on: "Can not process empty Imagick object").
+  The module hands the converter its own copy of the file, so this does not happen.
 - On Silverstripe 6 the `.ss` template engine (`silverstripe/template-engine`, part of
   `silverstripe/recipe-core`) for `$Image.Picture`
 

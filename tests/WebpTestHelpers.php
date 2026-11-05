@@ -96,6 +96,27 @@ trait WebpTestHelpers
     }
 
     /**
+     * Make Imagick the image backend's driver for images created after this call, when the
+     * extension is loaded. Returns whether it is. Silverstripe 6 (assets 3) already picks Imagick
+     * whenever it is loaded; Silverstripe 5 (assets 2, Intervention Image 2) defaults to GD and
+     * creates a new ImageManager per backend from Injector config, so that config is set here
+     * (the test's nested Injector drops it again).
+     */
+    protected function useImagick(): bool
+    {
+        if (!extension_loaded('imagick')) {
+            return false;
+        }
+        if (!class_exists('Intervention\\Image\\Drivers\\Imagick\\Driver')) {
+            # Intervention Image 2: the driver is a constructor option of the manager
+            Injector::inst()->load([
+                'Intervention\\Image\\ImageManager' => ['constructor' => [['driver' => 'imagick']]],
+            ]);
+        }
+        return true;
+    }
+
+    /**
      * Pretend Director is handling a request for $url (as it registers one with the Injector)
      */
     protected function simulateRequest(string $url): void

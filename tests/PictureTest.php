@@ -3,6 +3,8 @@
 namespace Restruct\Silverstripe\WebpImages\Tests;
 
 use Restruct\Silverstripe\WebpImages\WebpImages;
+use Restruct\Silverstripe\WebpImages\Tests\Stub\CountingFileConverterManager;
+use SilverStripe\Assets\Conversion\FileConverterManager;
 use SilverStripe\Assets\Conversion\InterventionImageFileConverter;
 use SilverStripe\Assets\File;
 use SilverStripe\Assets\Storage\DBFile;
@@ -134,6 +136,75 @@ class PictureTest extends SapphireTest
         # a plain list still works
         WebpImages::config()->set('picture_formats', ['webp', 'avif']);
         $this->assertSame(['avif', 'webp'], WebpImages::singleton()->getPictureFormats());
+    }
+
+    # -------------------------------------------------------------------------
+    # Two conversions of one variant (assets 2 + Imagick)
+    # -------------------------------------------------------------------------
+
+    /**
+     * `$Image.Picture` with AVIF on converts the same variant twice (avif, webp) and then renders
+     * the <img> from it. On assets 2 core's converter shallow-clones the image backend it is
+     * handed, and the clone's __destruct() destroys the Intervention image it shares with the
+     * original, which under Imagick empties the original's Imagick object: the next use of the
+     * variant threw "Can not process empty Imagick object" (HTTP 500 on the page).
+     *
+     * The failure needs Imagick, and a CI runner may not have it. Without Imagick the same
+     * scenario runs on GD, where it cannot fail (GD's destroy is a no-op), so the test below this
+     * one covers the cause itself on every backend. No skip: the suite has none by design.
+     */
+    public function testPictureWithAvifLeavesTheVariantUsable(): void
+    {
+        $this->useImagick();
+        WebpImages::config()->merge('picture_formats', ['avif' => true]);
+        $variant = $this->makeImage('pic-twice.jpg')->ScaleWidth(200);
+
+        $html = (string) $variant->Picture();
+
+        $this->assertStringContainsString('<source type="image/webp"', $html);
+        $this->assertMatchesRegularExpression('#<img [^>]*src="[^"]+\.jpg"#', $html);
+        $this->assertStringContainsString('width="200"', $html);
+        # and the variant is still usable after the conversions, eg for a further manipulation
+        $this->assertSame(100, (int) $variant->ScaleWidth(100)->getWidth());
+    }
+
+    /**
+     * The cause, on every backend: the module must not hand core's converter the caller's own
+     * file object, whose image backend the converter's shallow clone would share (see above).
+     */
+    public function testConverterIsNotHandedTheCallersFileObject(): void
+    {
+        $spy = new CountingFileConverterManager();
+        Injector::inst()->registerService($spy, FileConverterManager::class);
+        $variant = $this->makeImage('own-object.jpg')->ScaleWidth(200);
+        $record = $this->makeImage('own-record.jpg');
+
+        $converted = WebpImages::singleton()->convert($variant, 'webp');
+        WebpImages::singleton()->convert($record, 'webp');
+
+        $this->assertSame(2, $spy->calls);
+        $this->assertNotSame($variant, $spy->from[0]);
+        $this->assertNotSame($record, $spy->from[1]);
+        # it is the same stored file all the same
+        $this->assertSame($variant->getHash(), $spy->from[0]->getHash());
+        $this->assertSame($variant->getVariant(), $spy->from[0]->getVariant());
+        $this->assertSame($record->getFilename(), $spy->from[1]->getFilename());
+        $this->assertStringContainsString('ExtRewrite', (string) $converted->getVariant());
+    }
+
+    /**
+     * The file object handed to the converter is a fresh one (see above): it must still honour
+     * the caller's existing-only flag, as core sets it for CMS thumbnails
+     */
+    public function testExistingOnlyStillAppliesToTheConversion(): void
+    {
+        $variant = $this->makeImage('existing-only.jpg')->ScaleWidth(200);
+        $variant->setAllowGeneration(false);
+
+        $this->assertNull(WebpImages::singleton()->convert($variant, 'webp'));
+
+        $variant->setAllowGeneration(true);
+        $this->assertNotNull(WebpImages::singleton()->convert($variant, 'webp'));
     }
 
     # -------------------------------------------------------------------------

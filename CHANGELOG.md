@@ -39,6 +39,12 @@ wedevelopnl/silverstripe-webp-images 2.x".
   assets (dry run unless confirmed).
 - Unit tests (Silverstripe 5 and 6), Playwright browser tests, CI with PHPStan.
 
+### Fixed
+
+- Silverstripe 5 with Imagick: `$Image.Picture` with AVIF on gave an HTTP 500 ("Can not process
+  empty Imagick object"). Core's converter (assets 2) destroys the Imagick image it shares with the
+  file it converts; each conversion now gets its own copy of the file.
+
 ### Deprecated
 
 - `WeDevelop\WebpImages\WebpGenerator`: its Injector properties `enabled` and `quality` and
