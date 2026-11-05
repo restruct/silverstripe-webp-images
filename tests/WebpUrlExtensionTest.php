@@ -337,8 +337,8 @@ class WebpUrlExtensionTest extends SapphireTest
         $legacy->quality = 42;
         try {
             $this->assertSame(42, WebpImages::singleton()->getQuality('webp'));
-            # not for avif: 2.x never made avif
-            $this->assertNull(WebpImages::singleton()->getQuality('avif'));
+            # not for avif: 2.x never made avif, so avif keeps its own avif_quality (default 60)
+            $this->assertSame(60, WebpImages::singleton()->getQuality('avif'));
         } finally {
             $legacy->quality = null;
         }
