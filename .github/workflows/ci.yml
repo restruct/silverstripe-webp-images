@@ -61,7 +61,9 @@ jobs:
           php-version: ${{ matrix.php }}
           # gd: the suite draws its test images with GD, and GD is the image backend that encodes
           # the WebP (and, where the build has libavif, AVIF) variants
-          extensions: mbstring, intl, pdo_mysql, mysqli, gd, zip, dom, xml, tokenizer, simplexml, ctype, hash, session, fileinfo
+          # imagick on SS5 only: PictureTest runs its assets 2 Imagick regression on it (the suite
+          # stays on GD otherwise); on SS6 assets 3 would switch every test to Imagick once loaded
+          extensions: mbstring, intl, pdo_mysql, mysqli, gd, zip, dom, xml, tokenizer, simplexml, ctype, hash, session, fileinfo${{ matrix.silverstripe == '5' && ', imagick' || '' }}
           tools: composer:v2
           coverage: none
 
