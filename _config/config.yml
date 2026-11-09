@@ -1,20 +1,26 @@
 ---
 Name: webpimages
 ---
-SilverStripe\Core\Injector\Injector:
-  SilverStripe\Assets\Flysystem\PublicAdapter:
-    class: WeDevelop\WebpImages\Flysystem\PublicAssetAdapter
-  SilverStripe\Assets\Flysystem\ProtectedAdapter:
-    class: WeDevelop\WebpImages\Flysystem\ProtectedAssetAdapter
-
+# 3.0: the URL hook and the template helpers. The 2.x Injector overrides of core's public and
+# protected asset adapters are gone: WebP files are now core image variants (ExtRewrite), which the
+# asset store deletes, publishes and unpublishes together with the image itself.
+# The 2.x config is kept in docs/legacy-2x.md.
 SilverStripe\Assets\Storage\DBFile:
   extensions:
-    - WeDevelop\WebpImages\Storage\DBFileExtension
+    # serves a resized jpeg/png as its WebP variant (automatic mode)
+    - Restruct\Silverstripe\WebpImages\Extensions\WebpUrlExtension
+    # EnableWebP / DisableWebP / Picture on image variants ($Image.ScaleWidth(400).Picture)
+    - Restruct\Silverstripe\WebpImages\Extensions\WebpImageExtension
 
-SilverStripe\Assets\File:
-  allowed_extensions:
-    - webp
-
-Silverstripe\Assets\Image:
+# The same template helpers on the Image record itself ($Image.Picture, $Image.DisableWebP.Fill(...)).
+# Class name with a capital S: 2.x wrote "Silverstripe\Assets\Image", which only worked because
+# config class names are matched case-insensitively.
+SilverStripe\Assets\Image:
   extensions:
-    - WeDevelop\WebpImages\Asset\ImageExtension
+    - Restruct\Silverstripe\WebpImages\Extensions\WebpImageExtension
+
+# 2.x added webp to File.allowed_extensions; core already allows it (assets ^2 and ^3), in the
+# image app category too, so that entry is not repeated here.
+# SilverStripe\Assets\File:
+#   allowed_extensions:
+#     - webp

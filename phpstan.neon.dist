@@ -1,0 +1,17 @@
+# Static analysis, run by CI (job "phpstan") from a host project that has the module installed.
+# cambis/silverstan teaches PHPStan Silverstripe's magic (config, extensions, has_one getters).
+parameters:
+  level: 5
+  paths:
+    - src
+  # The module guards against hook arguments and config values that do not match their
+  # docblocks (a YAML value can be null, a hook can be called by other code); trusting the
+  # docblocks would report every such guard as "always true".
+  treatPhpDocTypesAsCertain: false
+  ignoreErrors:
+    # One code base serves Silverstripe 5 and 6. ArrayList moved between the two majors
+    # (SilverStripe\ORM -> SilverStripe\Model\List) and is picked by class_exists(), so the
+    # Silverstripe 5 name is always "not found" in the Silverstripe 6 host the analysis runs in.
+    -
+      identifier: class.notFound
+      message: '#SilverStripe\\ORM\\ArrayList#'
