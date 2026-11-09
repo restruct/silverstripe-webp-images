@@ -1,6 +1,6 @@
 # Changelog
 
-## 3.0.0 (unreleased)
+## 3.0.0 (2026-11-09)
 
 First release as `restruct/silverstripe-webp-images`, the maintained successor of
 `wedevelopnl/silverstripe-webp-images` 2.x. Breaking: see the README, "Upgrading from
