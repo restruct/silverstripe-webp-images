@@ -180,6 +180,20 @@ A request whose URL starts with the admin route (`admin/` by default, read from
 To change the decision, add an extension to `WebpImages` with
 `updateIsCmsRequest(bool &$isCms, ?HTTPRequest $request)`.
 
+### Using with restruct/silverstripe-signed-asset-urls
+
+A protected image (draft, or restricted to some visitors) is only served to a session that was
+granted it. [restruct/silverstripe-signed-asset-urls](https://github.com/restruct/silverstripe-signed-asset-urls)
+1.4+ hands out time-limited signed URLs for those instead (`$Image.ScaleWidth(400).AutoURL`). A
+signed URL is built from the stored file rather than through `getURL()`, so this module tells it
+which file to sign (its `updateSignedURLFile` hook): with both installed, `AutoURL`, `SignedURL`
+and `MaskedURL` give a signed URL for the WebP variant, under the same rules as automatic mode
+(resized images only by default, `DisableWebP` and `rewrite_urls` honoured). Public images keep
+their plain WebP URL. Nothing to configure; neither module requires the other.
+
+`$Image.Picture` does not sign its sources yet, so on a protected image its URLs fail for visitors
+without a grant ([#2](https://github.com/restruct/silverstripe-webp-images/issues/2)).
+
 ## Upgrading from wedevelopnl/silverstripe-webp-images 2.x
 
 ```sh

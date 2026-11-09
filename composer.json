@@ -33,6 +33,9 @@
     "require-dev": {
         "silverstripe/recipe-testing": "^3 || ^4"
     },
+    "suggest": {
+        "restruct/silverstripe-signed-asset-urls": "^1.4 - signed URLs for protected images; AutoURL/SignedURL then sign the WebP variant"
+    },
     "conflict": {
         "wedevelopnl/silverstripe-webp-images": "*"
     },

@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.1.0 (unreleased)
+
+### Added
+
+- restruct/silverstripe-signed-asset-urls 1.4+: `AutoURL`, `SignedURL` and `MaskedURL` on a
+  resized jpeg/png sign its WebP variant, as automatic mode serves it, instead of the unconverted
+  variant (`WebpUrlExtension::updateSignedURLFile()`). Same rules as the URL rewrite
+  (`shouldRewrite()`). signed-asset-urls is a suggestion in `composer.json`, not a dependency.
+- `WebpImages::getConvertedFile()`: the converted variant as a file, memoised per request (the
+  memo is cleared by `reset()` with the URL memo).
+
 ## 3.0.0 (2026-11-09)
 
 First release as `restruct/silverstripe-webp-images`, the maintained successor of

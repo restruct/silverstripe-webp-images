@@ -134,6 +134,15 @@ class WebpImages
     protected array $urlMemo = [];
 
     /**
+     * Converted files for this request, keyed by format, the source's Filename, Hash, Variant and
+     * existing-only flag (null = could not convert). For callers that need the file rather than
+     * its URL, eg restruct/silverstripe-signed-asset-urls (updateSignedURLFile hook).
+     *
+     * @var array<string, DBFile|null>
+     */
+    protected array $fileMemo = [];
+
+    /**
      * EnableWebP / DisableWebP flags, per file object (the Image record, or one of its variants).
      * A WeakMap, so a flag disappears with the object it was set on.
      *
@@ -249,6 +258,27 @@ class WebpImages
             $this->urlMemo[$key] = $converted ? (string) $converted->getSourceURL(false) : '';
         }
         return $this->urlMemo[$key] !== '' ? $this->urlMemo[$key] : null;
+    }
+
+    /**
+     * $file's variant in $format, or null when it cannot be converted. Memoised per request by the
+     * stored file (Filename, Hash, Variant), since a caller of this one has no URL to key on.
+     */
+    public function getConvertedFile(DBFile $file, string $format = 'webp'): ?DBFile
+    {
+        $key = implode('|', [
+            $format,
+            (string) $file->getFilename(),
+            (string) $file->getHash(),
+            (string) $file->getVariant(),
+            # an existing-only lookup (eg a CMS thumbnail) may find nothing where a normal one
+            # would convert, so the two are remembered apart
+            $file->getAllowGeneration() ? 'gen' : 'existing',
+        ]);
+        if (!array_key_exists($key, $this->fileMemo)) {
+            $this->fileMemo[$key] = $this->convert($file, $format);
+        }
+        return $this->fileMemo[$key];
     }
 
     /**
@@ -379,11 +409,13 @@ class WebpImages
     }
 
     /**
-     * Forget memoised URLs and the CMS-request answer (eg after deleting variants mid-request)
+     * Forget memoised URLs and files and the CMS-request answer (eg after deleting variants
+     * mid-request)
      */
     public function reset(): void
     {
         $this->urlMemo = [];
+        $this->fileMemo = [];
         $this->cmsRequestId = null;
         $this->cmsRequest = false;
     }

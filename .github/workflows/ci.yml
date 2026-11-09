@@ -75,6 +75,13 @@ jobs:
         # The module is pulled in through a PATH repository pointing at the checkout, symlinked
         # rather than mirrored ON PURPOSE: /tests is export-ignore in .gitattributes, so a mirrored
         # (dist-style) install would contain no tests and the suite would silently pass empty.
+        #
+        # restruct/silverstripe-signed-asset-urls is installed so SignedUrlFileHookTest's
+        # end-to-end test takes its signing branch (it only asserts the no-AutoURL branch without
+        # it). It must be 1.4+, the first release that calls the updateSignedURLFile hook: on 1.3
+        # the class exists but the jpeg is signed, and the test fails. Until 1.4.0 is tagged, the
+        # only source of the hook is the PR branch; with prefer-stable, ^1.4 wins as soon as a
+        # 1.4 release exists, so the branch alternative is inert from then on and can be dropped.
         run: |
           mkdir -p app-host
           cd app-host
@@ -84,7 +91,8 @@ jobs:
             "require": {
               "silverstripe/recipe-cms": "${{ matrix.recipe }}",
               "silverstripe/recipe-testing": "${{ matrix.testing }}",
-              "restruct/silverstripe-webp-images": "*"
+              "restruct/silverstripe-webp-images": "*",
+              "restruct/silverstripe-signed-asset-urls": "^1.4 || dev-feature/signed-url-file-hook"
             },
             "repositories": [
               { "type": "path", "url": "../module", "options": { "symlink": true } }
@@ -105,6 +113,8 @@ jobs:
           # policy. Blocking is disabled HERE ONLY, in a throwaway CI host project.
           composer config policy.advisories.block false
           composer update --no-interaction --no-progress
+          # Shows in the log which signed-asset-urls the end-to-end test ran against
+          composer show restruct/silverstripe-signed-asset-urls | grep -E '^(versions|source)'
 
       - name: Configure the test suite
         run: |
